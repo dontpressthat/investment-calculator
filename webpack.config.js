@@ -8,6 +8,10 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.js$/,
+        loader: 'ify-loader'
+      },
+      {
         test: /.js$|.jsx$/,
         exclude: /node_modules/,
         use: {
