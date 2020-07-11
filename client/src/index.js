@@ -2,4 +2,4 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App.jsx';
 
-ReactDOM.render(<App />, document.getElementsByClassName("container")[0]);
+ReactDOM.render(<App />, document.getElementById('calc'));
