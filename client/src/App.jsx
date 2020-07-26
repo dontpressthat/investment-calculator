@@ -1,20 +1,32 @@
 import React from 'react';
 import styled from 'styled-components';
-import CalculatorBody from './CalculatorBody';
+import CalculatorBody2 from './CalculatorBody-v2';
+
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+`
 
 const Main = styled.div`
+  display: flex;
   height: max-content;
-  min-height: 800px;
-  width: 600px;
+  width: max-content;
+  @media only screen and (min-width: 900px) {
+    justify-content: center;
+  };
+  @media only screen and (max-width: 900px) {
+    margin-top: 0;
+  };
 `
 
 const App = () => {
   return (
-    <React.Fragment>
+    <Container>
       <Main>
-        <CalculatorBody />
+        <CalculatorBody2 />
       </Main>
-    </React.Fragment>
+    </Container>
   )
 }
 
