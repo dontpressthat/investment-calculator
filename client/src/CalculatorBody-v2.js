@@ -3,50 +3,50 @@ import styled from 'styled-components';
 import InputItem from './InputItem';
 
 const Container = styled.div`
-  width: ${props => props.width};
-  max-width: ${props => props.maxWidth};
-  min-width: ${props => props.minWidth};
-  display: ${props => props.display};
-  flex-direction: ${props => props.direction};
-  flex-wrap: ${props => props.flexWrap};
-  justify-content: ${props => props.justify};
-  margin: ${props => props.margin};
-  position: relative;
-  background-color: ${props => props.bgColor};
-  padding: ${props => props.padding};
-  border: ${props => props.border};
-  border-radius: 5px;
+  width: ${props => props.width} !important;
+  max-width: ${props => props.maxWidth} !important;
+  min-width: ${props => props.minWidth} !important;
+  display: ${props => props.display} !important;
+  flex-direction: ${props => props.direction} !important;
+  flex-wrap: ${props => props.flexWrap} !important;
+  justify-content: ${props => props.justify} !important;
+  margin: ${props => props.margin} !important;
+  position: relative !important;
+  background-color: ${props => props.bgColor} !important;
+  padding: ${props => props.padding} !important;
+  border: ${props => props.border} !important;
+  border-radius: 5px !important;
   &.col {
-    width: 48.5%;
-    border: 1px solid #c0c0c0;
-    margin: 5px;
-    background-color: #fff;
+    width: 48.5% !important;
+    border: 1px solid #c0c0c0 !important;
+    margin: 5px !important;
+    background-color: #fff !important;
   };
   @media only screen and (min-width: 420px) {
     &.col {
-      min-width: 400px;
-      box-shadow: 3px 3px 15px #f0f0f0;
+      min-width: 400px !important;
+      box-shadow: 3px 3px 15px #f0f0f0 !important;
     };
   };
   @media only screen and (max-width: 420px) {
     &.col {
-      min-width: 95vw;
+      min-width: 95vw !important;
     };
     label {
-    font-size: 10pt;
+    font-size: 10pt !important;
     };
   };
   span {
     &.heading {
-      font-family: 'Roboto Condensed', sans-serif;
-      text-align: center;
-      height: 100%;
-      line-height: 40px;
-      white-space: nowrap;
+      font-family: 'Roboto Condensed', sans-serif !important;
+      text-align: center !important;
+      height: 100% !important;
+      line-height: 40px !important;
+      white-space: nowrap !important;
     };
   };
   h2 {
-    font-family: 'Roboto Condensed', sans-serif;
+    font-family: 'Roboto Condensed', sans-serif !important;
   }
 `
 

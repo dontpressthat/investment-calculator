@@ -4,84 +4,84 @@ import styled from 'styled-components';
 const itemHeight = '30px';
 
 const Container = styled.div`
-  position: ${props => props.position};
-  width: ${props => props.width};
-  height: ${props => props.height};
-  display: ${props => props.display};
-  flex-flow: ${props => props.flow};
-  justify-content: ${props => props.justify};
-  align-items: ${props => props.align};
-  margin: ${props => props.margin};
-  background-color: ${props => props.bgColor};
+  position: ${props => props.position} !important;
+  width: ${props => props.width} !important;
+  height: ${props => props.height} !important;
+  display: ${props => props.display} !important;
+  flex-flow: ${props => props.flow} !important;
+  justify-content: ${props => props.justify} !important;
+  align-items: ${props => props.align} !important;
+  margin: ${props => props.margin} !important;
+  background-color: ${props => props.bgColor} !important;
   label, span {
-    text-align: center;
-    height: 100%;
-    line-height: ${itemHeight};
-    white-space: nowrap;
-    font-family: 'Roboto Condensed', sans-serif;
-    font-weight: 300;
+    text-align: center !important;
+    height: 100% !important;
+    line-height: ${itemHeight} !important;
+    white-space: nowrap !important;
+    font-family: 'Roboto Condensed', sans-serif !important;
+    font-weight: 300 !important;
   };
 `;
 
 const Input = styled.input`
-  width: ${props => props.width};
-  height: ${itemHeight};
+  width: ${props => props.width} !important;
+  height: ${itemHeight} !important;
   ::-webkit-inner-spin-button{
-    -webkit-appearance: none; 
-    margin: 0; 
+    -webkit-appearance: none !important; 
+    margin: 0 !important; 
   };
   ::-webkit-outer-spin-button{
-    -webkit-appearance: none;
-    margin: 0; 
+    -webkit-appearance: none !important;
+    margin: 0 !important; 
   };
   input[type=number] {
-    -moz-appearance: textfield;
+    -moz-appearance: textfield !important;
   };
-  border: 1px solid #e0e0e0;
-  color: #333333;
-  background-color: #fff;
-  padding-left: ${props => props.paddingLeft || '10px'};
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  border-radius: 0px;
-  font-size: 16px;
+  border: 1px solid #e0e0e0 !important;
+  color: #333333 !important;
+  background-color: #fff !important;
+  padding-left: ${props => props.paddingLeft || '10px'} !important;
+  -webkit-box-sizing: border-box !important;
+  -moz-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+  border-radius: 0px !important;
+  font-size: 16px !important;
   &.readOnly {
-    background-color: ${props => props.readOnlyBgColor};
+    background-color: ${props => props.readOnlyBgColor} !important;
   };
-  font-family: 'Roboto Condensed', sans-serif;
-  outline: ${props => props.readOnly ? 'none' : null};
-  outline-color: #c3d4c7;
-  box-shadow: none;
+  font-family: 'Roboto Condensed', sans-serif !important;
+  outline: ${props => props.readOnly ? 'none' : null} !important;
+  outline-color: #c3d4c7 !important;
+  box-shadow: none !important;
 `;
 
 const DollarPrefix = styled.div`
-  position: relative;
-  width: ${props => props.width};
+  position: relative !important;
+  width: ${props => props.width} !important;
   &::before {
-    position: absolute;
-    content: '$';
-    font-size: 16px;
-    font-family: 'Roboto Condensed', sans-serif;
-    color: #555555;
-    font-weight: 400;
-    left: 8px;
-    top: 5px;
+    position: absolute !important;
+    content: '$' !important;
+    font-size: 16px !important;
+    font-family: 'Roboto Condensed', sans-serif !important;
+    color: #555555 !important;
+    font-weight: 400 !important;
+    left: 8px !important;
+    top: 5px !important;
   };
 `
 
 const PercentSuffix = styled.div`
-  position: relative;
-  width: ${props => props.width};
+  position: relative !important;
+  width: ${props => props.width} !important;
   &::after {
-    position: absolute;
-    content: '%';
-    font-size: 16px;
-    font-family: 'Roboto Condensed', sans-serif;
-    color: #555555;
-    font-weight: 400;
-    right: 7px;
-    top: 5px;
+    position: absolute !important;
+    content: '%' !important;
+    font-size: 16px !important;
+    font-family: 'Roboto Condensed', sans-serif !important;
+    color: #555555 !important;
+    font-weight: 400 !important;
+    right: 7px !important;
+    top: 5px !important;
   };
 `
 
