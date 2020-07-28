@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import NumberFormat from 'react-number-format';
 
 const itemHeight = '30px';
 
@@ -23,7 +24,7 @@ const Container = styled.div`
   };
 `;
 
-const Input = styled.input`
+const Input = styled(NumberFormat)`
   width: ${props => props.width} !important;
   height: ${itemHeight} !important;
   ::-webkit-inner-spin-button{
@@ -40,19 +41,21 @@ const Input = styled.input`
   border: 1px solid #e0e0e0 !important;
   color: #333333 !important;
   background-color: #fff !important;
-  padding-left: ${props => props.paddingLeft || '10px'} !important;
+  padding-left: ${props => props.paddingleft || '10px'} !important;
   -webkit-box-sizing: border-box !important;
   -moz-box-sizing: border-box !important;
   box-sizing: border-box !important;
   border-radius: 0px !important;
   font-size: 16px !important;
   &.readOnly {
-    background-color: ${props => props.readOnlyBgColor} !important;
+    background-color: ${props => props.readonlybgcolor} !important;
+    color: ${props => props.readonlytextcolor} !important;
   };
   font-family: 'Roboto Condensed', sans-serif !important;
   outline: ${props => props.readOnly ? 'none' : null} !important;
   outline-color: #c3d4c7 !important;
   box-shadow: none !important;
+  font-weight: ${props => props.weight};
 `;
 
 const DollarPrefix = styled.div`
@@ -63,7 +66,7 @@ const DollarPrefix = styled.div`
     content: '$' !important;
     font-size: 16px !important;
     font-family: 'Roboto Condensed', sans-serif !important;
-    color: #555555 !important;
+    color: ${props => props.color} !important;
     font-weight: 400 !important;
     left: 8px !important;
     top: 5px !important;
@@ -78,49 +81,89 @@ const PercentSuffix = styled.div`
     content: '%' !important;
     font-size: 16px !important;
     font-family: 'Roboto Condensed', sans-serif !important;
-    color: #555555 !important;
+    color: ${props => props.color} !important;
     font-weight: 400 !important;
     right: 7px !important;
     top: 5px !important;
   };
 `
 
-const InputItem = ({ label, name, name1, name2, value, value1, value2, handleChange, sign, readOnly, select }) => {
+const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRadioChange, handleChange, sign, readOnly, select, payable, weight }) => {
   let dollarPadding;
   let dollarSign;
   let percentSign;
 
+  const prefixSuffixColor = () => {
+    if (
+      label === 'Cash on Cash Return' ||
+      label === 'Net Income' ||
+      label === 'Cap Rate'
+    ) {
+      if (value < 0) {
+        return '#e0e0e0';
+      } else if (value > 0) {
+        return '#555555';
+      }
+    } else if (payable) {
+      return '#e37878'
+    } else {
+      return '#555555'
+    }
+  };
+
   if (sign === 'dollar') {
     dollarPadding = '20px';
-    dollarSign = <DollarPrefix />;
+    dollarSign = <DollarPrefix color={prefixSuffixColor()} />;
   } else if (sign === 'percent') {
-    percentSign = <PercentSuffix />;
+    percentSign = <PercentSuffix color={prefixSuffixColor()} />;
   } else if (name1 && name2) {
-    dollarSign = <DollarPrefix />;
-    percentSign = <PercentSuffix />;
+    dollarSign = <DollarPrefix color={prefixSuffixColor()} />;
+    percentSign = <PercentSuffix color={prefixSuffixColor()} />;
   };
 
   const or = <Container><span>OR</span></Container>
   const select1 = (
     <Container>
-      <input className='radio' type='radio' name='propertyMgmtRadio' value='1' onChange={handleChange} />
+      <input className='radio' type='radio' name='propertyMgmtRadio' value='1' onChange={handleRadioChange} />
     </Container>
   );
   const select2 = (
     <Container>
-      <input className='radio' type='radio' name='propertyMgmtRadio' value='2' onChange={handleChange} defaultChecked />
+      <input className='radio' type='radio' name='propertyMgmtRadio' value='2' onChange={handleRadioChange} defaultChecked />
     </Container>
   );
 
-  const readOnlyColor = () => {
+  const readOnlyBgColor = () => {
     if (
       label === 'Cash on Cash Return' ||
       label === 'Net Income' ||
       label === 'Cap Rate'
-      ) {
-      return '#c3d4c7';
+    ) {
+      if (value < 0) {
+        return '#e37878';
+      } else if (value > 0) {
+        return '#c3d4c7';
+      }
     } else {
       return '#f0f0f0'
+    }
+  };
+
+  const readOnlyTextColor = () => {
+    if (
+      label === 'Cash on Cash Return' ||
+      label === 'Net Income' ||
+      label === 'Cap Rate'
+    ) {
+      if (value < 0) {
+        return '#fff';
+      } else if (value > 0) {
+        return '#333';
+      }
+    } else if (payable) {
+      return '#ba6e6e'
+    } else {
+      return '#55555'
     }
   };
 
@@ -134,7 +177,7 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleCha
       <Container width='50%' margin='5px'>
         {dollarSign}
         {percentSign}
-        <Input type='number' name={name} value={value} onChange={handleChange} width='100%' paddingLeft={dollarPadding} readOnly={readOnly} className={readOnly ? 'readOnly' : null} readOnlyBgColor={readOnlyColor}></Input>
+        <Input name={name} value={value} onChange={handleChange} width='100%' paddingleft={dollarPadding} readOnly={readOnly} className={readOnly ? 'readOnly' : null} readonlybgcolor={readOnlyBgColor()} readonlytextcolor={readOnlyTextColor()} thousandSeparator={true} isNumericString={true} placeholder={0} weight={weight}></Input>
       </Container>
     </Container>
   );
@@ -152,7 +195,7 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleCha
             {select ? select1 : null}
             <Container margin={select ? '0 0 0 5px' : null}>
               {dollarSign}
-              <Input type='number' name={name1} value={value1} onChange={handleChange} width='100%' paddingLeft='20px'></Input>
+              <Input name={name1} value={value1} onChange={handleChange} width='100%' paddingleft='20px' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()}></Input>
             </Container>
           </Container>
         </Container>
@@ -162,7 +205,7 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleCha
             {select ? select2 : null}
             <Container margin={select ? '0 0 0 5px' : null}>
               {percentSign}
-              <Input type='number' name={name2} value={value2} onChange={handleChange} width='100%'></Input>
+              <Input name={name2} value={value2} onChange={handleChange} width='100%' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()}></Input>
             </Container>
           </Container>
         </Container>
