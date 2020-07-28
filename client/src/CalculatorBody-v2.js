@@ -44,6 +44,14 @@ const Container = styled.div`
       line-height: 40px !important;
       white-space: nowrap !important;
     };
+    &.title {
+      font-family: 'Roboto Condensed', sans-serif !important;
+      font-size: 16pt;
+      text-align: center !important;
+      height: 100% !important;
+      line-height: 40px !important;
+      white-space: nowrap !important;
+    };
   };
   h2 {
     font-family: 'Roboto Condensed', sans-serif !important;
@@ -76,21 +84,26 @@ class CalculatorBody2 extends React.Component {
       rentPerUnitRehab: 3000,
       vacancyPercentage: 5,
       maintenancePercentage: 5,
-      cashBack: 0
+      cashBack: ''
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleRadioChange = this.handleRadioChange.bind(this);
     this.monthlyPayment = this.monthlyPayment.bind(this);
     this.isInt = this.isInt.bind(this);
     this.calculatePmi = this.calculatePmi.bind(this);
+    this.removeCommas = this.removeCommas.bind(this);
   };
 
   handleInputChange(event) {
     const target = event.target;
-    const value = target.value;
     const name = target.name;
+    const value = target.value;
+    const autoZero = value === '' ? 0 : this.removeCommas(value);
+
+
     this.setState({
-      [name]: value
+      [name]: autoZero
     }, () => {
       if (name === 'downPayment') {
         this.setState({
@@ -101,7 +114,7 @@ class CalculatorBody2 extends React.Component {
       };
       if (name === 'downPaymentPercentage' || name === 'purchasePrice') {
         this.setState({
-          downPayment: this.isInt(this.state.purchasePrice * (this.state.downPaymentPercentage / 100))
+          downPayment: this.isInt((this.state.purchasePrice) * ((this.state.downPaymentPercentage) / 100))
         }, () => {
           this.setState({
             loanOriginationFee: this.isInt((this.state.purchasePrice - this.state.downPayment) * this.state.loanOriginationPercentage / 100),
@@ -121,9 +134,26 @@ class CalculatorBody2 extends React.Component {
       if (name === 'closingCostPercentage') {
         this.setState({ closingCostFee: this.isInt(this.state.purchasePrice * this.state.closingCostPercentage / 100) })
       };
-      if (name === 'numUnits') {
-        this.setState({})
-      };
+    });
+  };
+
+  removeCommas(value) {
+    if (typeof value === 'string') {
+      const decomma = value.split(',');
+      const parsed = parseFloat(decomma.join(''))
+
+      return parsed;
+    }
+    return value;
+  };
+
+  handleRadioChange(event) {
+    const target = event.target;
+    const name = target.name;
+    const value = target.value;
+
+    this.setState({
+      [name]: value
     });
   };
 
@@ -144,7 +174,7 @@ class CalculatorBody2 extends React.Component {
   };
 
   isInt(value) {
-    const num = Number.isInteger(parseFloat(value)) ? parseInt(value).toFixed(0) : parseFloat(value).toFixed(2);
+    const num = Number.isInteger(value) ? parseInt(value).toFixed(0) : parseFloat(value).toFixed(2);
     return num % 1 === 0 ? Math.floor(num) : num;
   };
 
@@ -164,33 +194,35 @@ class CalculatorBody2 extends React.Component {
 
   render() {
     let purchasePrice = this.state.purchasePrice;
-    let loanAmount = purchasePrice - this.state.downPayment;
+    let downPayment = this.state.downPayment;
+    let downPaymentPercentage = this.state.downPaymentPercentage;
+    let loanAmount = purchasePrice - (downPayment);
     let payment = this.monthlyPayment(
-      (this.state.interestRate / 100) / 12,
-      this.state.loanTermYears * 12,
-      (-1 * purchasePrice) * (1 - (this.state.downPaymentPercentage / 100))
+      ((this.state.interestRate) / 100) / 12,
+      (this.state.loanTermYears) * 12,
+      (-1 * purchasePrice) * (1 - ((downPaymentPercentage) / 100))
     );
-    let pmi = this.isInt(this.calculatePmi(this.state.downPaymentPercentage));
-    let loanOrigination = loanAmount * (this.state.loanOriginationPercentage / 100);
-    let closingCost = purchasePrice * (this.state.closingCostPercentage / 100);
-    let monthlyTax = (this.state.taxRatePercentage / 100) * purchasePrice / 12;
-    let totalInsurance = this.state.insurancePerUnit * this.state.numUnits;
-    let totalUtilities = this.state.utilitiesPerUnit * this.state.numUnits;
-    let totalBeforeIncome = this.state.numUnits * this.state.rentPerUnit;
-    let totalAfterIncome = this.state.numUnits * this.state.rentPerUnitRehab;
+    let pmi = this.isInt(this.calculatePmi(downPaymentPercentage));
+    let loanOrigination = loanAmount * ((this.state.loanOriginationPercentage) / 100);
+    let closingCost = purchasePrice * ((this.state.closingCostPercentage) / 100);
+    let monthlyTax = ((this.state.taxRatePercentage) / 100) * purchasePrice / 12;
+    let totalInsurance = (this.state.insurancePerUnit) * (this.state.numUnits);
+    let totalUtilities = this.state.utilitiesPerUnit * (this.state.numUnits);
+    let totalBeforeIncome = (this.state.numUnits) * (this.state.rentPerUnit);
+    let totalAfterIncome = (this.state.numUnits) * this.state.rentPerUnitRehab;
     let propertyMgmtFeeBefore = this.state.propertyMgmtRadio === '1' ? this.state.propertyMgmtFee : totalBeforeIncome * this.state.propertyMgmtPercentage / 100;
     let propertyMgmtFeeAfter = this.state.propertyMgmtRadio === '1' ? this.state.propertyMgmtFee : totalAfterIncome * this.state.propertyMgmtPercentage / 100;
-    let vacancyAmtBefore = totalBeforeIncome * this.state.vacancyPercentage / 100;
-    let vacancyAmtAfter = totalAfterIncome * this.state.vacancyPercentage / 100;
-    let maintenanceAmtBefore = totalBeforeIncome * this.state.maintenancePercentage / 100;
-    let maintenanceAmtAfter = totalAfterIncome * this.state.maintenancePercentage / 100;
-    let operatingExpensesBefore = monthlyTax + totalInsurance + parseFloat(propertyMgmtFeeBefore) + totalUtilities + vacancyAmtBefore + maintenanceAmtBefore + parseFloat(pmi);
-    let operatingExpensesAfter = monthlyTax + totalInsurance + parseFloat(propertyMgmtFeeAfter) + totalUtilities + vacancyAmtAfter + maintenanceAmtAfter + parseFloat(pmi);
-    let netIncomeBefore = totalBeforeIncome - operatingExpensesBefore - payment;
+    let vacancyAmtBefore = totalBeforeIncome * (this.state.vacancyPercentage) / 100;
+    let vacancyAmtAfter = totalAfterIncome * (this.state.vacancyPercentage) / 100;
+    let maintenanceAmtBefore = totalBeforeIncome * (this.state.maintenancePercentage) / 100;
+    let maintenanceAmtAfter = totalAfterIncome * (this.state.maintenancePercentage) / 100;
+    let operatingExpensesBefore = monthlyTax + totalInsurance + parseFloat(propertyMgmtFeeBefore) + totalUtilities + (vacancyAmtBefore) + maintenanceAmtBefore + parseFloat(pmi);
+    let operatingExpensesAfter = monthlyTax + totalInsurance + parseFloat(propertyMgmtFeeAfter) + totalUtilities + (vacancyAmtAfter) + maintenanceAmtAfter + parseFloat(pmi);
+    let netIncomeBefore = totalBeforeIncome - parseFloat(operatingExpensesBefore) - payment;
     let netIncomeAfter = totalAfterIncome - operatingExpensesAfter - payment;
-    let turnKeyCost = parseFloat(this.state.downPayment) + loanOrigination + closingCost - this.state.cashBack;
+    let turnKeyCost = parseFloat(downPayment) + loanOrigination + closingCost - (this.state.cashBack);
     let cashOnCashReturnBefore = netIncomeBefore * 12 / turnKeyCost * 100;
-    let cashOnCashReturnAfter = netIncomeAfter * 12 / (turnKeyCost + parseFloat(this.state.rehab)) * 100;
+    let cashOnCashReturnAfter = netIncomeAfter * 12 / (turnKeyCost + this.state.rehab) * 100;
     let capRateBefore = (totalBeforeIncome - operatingExpensesBefore) * 12 / purchasePrice * 100;
     let capRateAfter = (totalAfterIncome - operatingExpensesAfter) * 12 / purchasePrice * 100;
 
@@ -207,62 +239,76 @@ class CalculatorBody2 extends React.Component {
         <Container display='flex' direction='row' justify='space-around' flexWrap='wrap'>
           <Container className='col col1'>
 
+            <Container width='100%' display='flex' align='center' justify='center' height='40px'>
+              <span className='title'>INPUTS</span>
+            </Container>
+
             <InputItem label='Purchase Price' name='purchasePrice' value={this.state.purchasePrice} handleChange={this.handleInputChange} sign='dollar' />
+            <InputItem label='Cash Back' name='cashBack' value={this.state.cashBack} handleChange={this.handleInputChange} sign='dollar' />
             <InputItem label='Down Payment' name1='downPayment' value1={this.state.downPayment} name2='downPaymentPercentage' value2={this.state.downPaymentPercentage} handleChange={this.handleInputChange} />
             <InputItem label='Loan Interest Rate' name='interestRate' value={this.state.interestRate} handleChange={this.handleInputChange} sign='percent' />
             <InputItem label='Tax Rate' name='taxRatePercentage' value={this.state.taxRatePercentage} handleChange={this.handleInputChange} sign='percent' />
             <InputItem label='Loan Term (Years)' name='loanTermYears' value={this.state.loanTermYears} handleChange={this.handleInputChange} />
             <InputItem label='Loan Origination Fee' name1='loanOriginationFee' value1={this.state.loanOriginationFee} name2='loanOriginationPercentage' value2={this.state.loanOriginationPercentage} handleChange={this.handleInputChange} />
             <InputItem label='Closing Cost' name1='closingCostFee' value1={this.state.closingCostFee} name2='closingCostPercentage' value2={this.state.closingCostPercentage} handleChange={this.handleInputChange} />
-            <InputItem label='Number of Units' name='numUnits' value={this.state.numUnits} handleChange={this.handleInputChange} />
+            <InputItem label='Number of Units' name='numUnits' value={(this.state.numUnits)} handleChange={this.handleInputChange} />
             <InputItem label='Before Rehab Income/Unit' name='rentPerUnit' value={this.state.rentPerUnit} handleChange={this.handleInputChange} sign='dollar' />
-            <InputItem label='After Rehab Income/Unit' name='rentPerUnitRehab' value={this.state.rentPerUnitRehab} handleChange={this.handleInputChange} sign='dollar' />
             <InputItem label='Estimated Rehab Cost' name='rehab' value={this.state.rehab} handleChange={this.handleInputChange} sign='dollar' />
+            <InputItem label='After Rehab Income/Unit' name='rentPerUnitRehab' value={this.state.rentPerUnitRehab} handleChange={this.handleInputChange} sign='dollar' />
             <InputItem label='Insurance Cost/Unit' name='insurancePerUnit' value={this.state.insurancePerUnit} handleChange={this.handleInputChange} sign='dollar' />
             <InputItem label='Utilities Cost/Unit' name='utilitiesPerUnit' value={this.state.utilitiesPerUnit} handleChange={this.handleInputChange} sign='dollar' />
-            <InputItem label='Property Mgmt Fee' name1='propertyMgmtFee' value1={this.state.propertyMgmtFee} name2='propertyMgmtPercentage' value2={this.state.propertyMgmtPercentage} handleChange={this.handleInputChange} select={true} />
+            <InputItem label='Property Mgmt Fee' name1='propertyMgmtFee' value1={this.state.propertyMgmtFee} name2='propertyMgmtPercentage' value2={this.state.propertyMgmtPercentage} handleRadioChange={this.handleRadioChange} handleChange={this.handleInputChange} select={true} />
             <InputItem label='Vacancy' name='vacancyPercentage' value={this.state.vacancyPercentage} handleChange={this.handleInputChange} sign='percent' />
             <InputItem label='Maintenance' name='maintenancePercentage' value={this.state.maintenancePercentage} handleChange={this.handleInputChange} sign='percent' />
-            <InputItem label='Cash Back' name='cashBack' value={this.state.cashBack} handleChange={this.handleInputChange} sign='dollar' />
           </Container>
 
           <Container className='col col2'>
 
-            <InputItem label='Purchase Price' name='purchasePrice' value={this.isInt(purchasePrice)} sign='dollar' readOnly={true} />
-            <InputItem label='Down Payment' name='downPayment' value={this.state.downPayment} sign='dollar' readOnly={true} />
-            <InputItem label='Loan Amount' name='loanAmount' value={this.isInt(loanAmount)} sign='dollar' readOnly={true} />
-            <InputItem label='Loan Origination Fee' name='loanOrigination' value={this.isInt(loanOrigination)} sign='dollar' readOnly={true} />
-            <InputItem label='Closing Cost' name='closingCost' value={this.isInt(closingCost)} sign='dollar' readOnly={true} />
-            <InputItem label='Turn-Key Cost' name='turnKeyCost' value={this.isInt(turnKeyCost)} sign='dollar' readOnly={true} />
-            <InputItem label='Tax' name='monthlyTax' value={this.isInt(monthlyTax)} sign='dollar' readOnly={true} />
-            <InputItem label='Total Insurance' name='totalInsurance' value={this.isInt(totalInsurance)} sign='dollar' readOnly={true} />
-            <InputItem label='Total Utilities' name='totalUtilities' value={this.isInt(totalUtilities)} sign='dollar' readOnly={true} />
+            <Container width='100%' display='flex' align='center' justify='center' height='40px'>
+              <span className='title'>OUTPUTS</span>
+            </Container>
+
+            <InputItem label='Purchase Price' name='purchasePrice' value={this.isInt(purchasePrice)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Down Payment' name='downPayment' value={this.state.downPayment} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Loan Amount' name='loanAmount' value={this.isInt(loanAmount)} sign='dollar' readOnly={true} weight={700} />
+            <InputItem label='Loan Origination Fee' name='loanOrigination' value={this.isInt(loanOrigination)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Closing Cost' name='closingCost' value={this.isInt(closingCost)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Turn-Key Cost' name='turnKeyCost' value={this.isInt(turnKeyCost)} sign='dollar' readOnly={true} payable={true} weight={700} />
             {this.state.downPaymentPercentage < 20 ? pmiLineItem : null}
-            <InputItem label='Monthly Payment' name='monthlyPayment' value={this.isInt(payment)} sign='dollar' readOnly={true} />
+
 
             <Container width='100%' display='flex' align='center' justify='center' height='40px'>
               <span className='heading'>BEFORE REHAB</span>
             </Container>
-            <InputItem label='Total Rent Income' name='totalBeforeIncome' value={this.isInt(totalBeforeIncome)} sign='dollar' readOnly={true} />
-            <InputItem label={`${this.state.vacancyPercentage}% Vacancy`} name='vacancyBefore' value={this.isInt(vacancyAmtBefore)} sign='dollar' readOnly={true} />
-            <InputItem label={`${this.state.maintenancePercentage}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtBefore)} sign='dollar' readOnly={true} />
-            <InputItem label='Property Mgmt Fee' name='propertyMgmtFeeBefore' value={this.isInt(propertyMgmtFeeBefore)} sign='dollar' readOnly={true} />
-            <InputItem label='Total Operating Expenses' name='totalOperatingExpensesBefore' value={this.isInt(operatingExpensesBefore)} sign='dollar' readOnly={true} />
-            <InputItem label='Net Income' name='netBeforeIncome' value={this.isInt(netIncomeBefore)} sign='dollar' readOnly={true} />
+            <InputItem label='Total Rent Income' name='totalBeforeIncome' value={this.isInt(totalBeforeIncome)} sign='dollar' readOnly={true} weight={700} />
+            <InputItem label='Debt Service' name='monthlyPayment' value={this.isInt(payment)} sign='dollar' readOnly={true} payable={true} weight={700} />
+            <InputItem label='Tax' name='monthlyTax' value={this.isInt(monthlyTax)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Insurance' name='totalInsurance' value={this.isInt(totalInsurance)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Utilities' name='totalUtilities' value={this.isInt(totalUtilities)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.vacancyPercentage}% Vacancy`} name='vacancyBefore' value={this.isInt(vacancyAmtBefore)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.maintenancePercentage}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtBefore)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Property Mgmt Fee' name='propertyMgmtFeeBefore' value={this.isInt(propertyMgmtFeeBefore)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Operating Expenses' name='totalOperatingExpensesBefore' value={this.isInt(operatingExpensesBefore)} sign='dollar' readOnly={true} payable={true} weight={700} />
+            <InputItem label='Net Income' name='netBeforeIncome' value={this.isInt(netIncomeBefore)} sign='dollar' readOnly={true} weight={700} />
             <InputItem label='Cash on Cash Return' name='ccrBefore' value={this.isInt(cashOnCashReturnBefore)} sign='percent' readOnly={true} />
             <InputItem label='Cap Rate' name='capRateBefore' value={this.isInt(capRateBefore)} sign='percent' readOnly={true} />
 
             <Container width='100%' display='flex' align='center' justify='center' height='40px'>
               <span className='heading'>AFTER REHAB</span>
             </Container>
-            <InputItem label='Total Rent Income' name='totalAfterIncome' value={this.isInt(totalAfterIncome)} sign='dollar' readOnly={true} />
-            <InputItem label={`${this.state.vacancyPercentage}% Vacancy`} name='vacancyAfter' value={this.isInt(vacancyAmtAfter)} sign='dollar' readOnly={true} />
-            <InputItem label={`${this.state.maintenancePercentage}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtAfter)} sign='dollar' readOnly={true} />
-            <InputItem label='Property Mgmt Fee' name='propertyMgmtFeeAfter' value={this.isInt(propertyMgmtFeeAfter)} sign='dollar' readOnly={true} />
-            <InputItem label='Total Operating Expenses' name='totalOperatingExpensesAfter' value={this.isInt(operatingExpensesAfter)} sign='dollar' readOnly={true} />
-            <InputItem label='Net Income' name='netAfterIncome' value={this.isInt(netIncomeAfter)} sign='dollar' readOnly={true} />
+            <InputItem label='Total Rent Income' name='totalAfterIncome' value={this.isInt(totalAfterIncome)} sign='dollar' readOnly={true} weight={700} />
+            <InputItem label='Debt Service' name='monthlyPayment' value={this.isInt(payment)} sign='dollar' readOnly={true} payable={true} weight={700} />
+            <InputItem label='Tax' name='monthlyTax' value={this.isInt(monthlyTax)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Insurance' name='totalInsurance' value={this.isInt(totalInsurance)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Utilities' name='totalUtilities' value={this.isInt(totalUtilities)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.vacancyPercentage}% Vacancy`} name='vacancyAfter' value={this.isInt(vacancyAmtAfter)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.maintenancePercentage}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtAfter)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Property Mgmt Fee' name='propertyMgmtFeeAfter' value={this.isInt(propertyMgmtFeeAfter)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Operating Expenses' name='totalOperatingExpensesAfter' value={this.isInt(operatingExpensesAfter)} sign='dollar' readOnly={true} payable={true} weight={700} />
+            <InputItem label='Net Income' name='netAfterIncome' value={this.isInt(netIncomeAfter)} sign='dollar' readOnly={true} weight={700} />
             <InputItem label='Cash on Cash Return' name='ccrAfter' value={this.isInt(cashOnCashReturnAfter)} sign='percent' readOnly={true} />
             <InputItem label='Cap Rate' name='capRateAfter' value={this.isInt(capRateAfter)} sign='percent' readOnly={true} />
+
 
           </Container>
         </Container>
