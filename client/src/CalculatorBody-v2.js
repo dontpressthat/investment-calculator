@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import InputItem from './InputItem';
 import Separator from './Separator';
-import Dropdown from './Dropdown';
 import { Plus } from './svg';
 
 const Container = styled.div`
@@ -88,9 +87,8 @@ class CalculatorBody2 extends React.Component {
       vacancyPercentage: 5,
       maintenancePercentage: 5,
       cashBack: '',
-      dropdown: true,
-      differentIncomeBefore: [{ qty: 1, amt: null }],
-      differentIncomeAfter: [{ qty: 1, amt: null }]
+      differentIncomeBefore: [{ qty: 2, amt: 1900 }],
+      differentIncomeAfter: [{ qty: 2, amt: 3000 }]
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -293,10 +291,10 @@ class CalculatorBody2 extends React.Component {
     let loanOrigination = loanAmount * ((this.state.loanOriginationPercentage) / 100);
     let closingCost = purchasePrice * ((this.state.closingCostPercentage) / 100);
     let monthlyTax = ((this.state.taxRatePercentage) / 100) * purchasePrice / 12;
-    let totalInsuranceBefore = this.state.dropdown ? this.state.insurancePerUnit * this.state.numUnits : this.state.insurancePerUnit * this.calculateNumUnitsBefore();
-    let totalInsuranceAfter = this.state.dropdown ? this.state.insurancePerUnit * this.state.numUnits : this.state.insurancePerUnit * this.calculateNumUnitsAfter();
-    let totalUtilitiesBefore = this.state.dropdown ? this.state.utilitiesPerUnit * this.state.numUnits : this.state.utilitiesPerUnit * this.calculateNumUnitsBefore();
-    let totalUtilitiesAfter = this.state.dropdown ? this.state.utilitiesPerUnit * this.state.numUnits : this.state.utilitiesPerUnit * this.calculateNumUnitsAfter();
+    let totalInsuranceBefore = this.state.insurancePerUnit * this.calculateNumUnitsBefore();
+    let totalInsuranceAfter = this.state.insurancePerUnit * this.calculateNumUnitsAfter();
+    let totalUtilitiesBefore = this.state.utilitiesPerUnit * this.calculateNumUnitsBefore();
+    let totalUtilitiesAfter = this.state.utilitiesPerUnit * this.calculateNumUnitsAfter();
     let totalBeforeIncome = this.state.dropdown ? this.state.numUnits * this.state.rentPerUnit : this.calculateTotalBefore();
     let totalAfterIncome = this.state.dropdown ? this.state.numUnits * this.state.rentPerUnitRehab : this.calculateTotalAfter();
     let propertyMgmtFeeBefore = this.state.propertyMgmtRadio === '1' ? (this.state.propertyMgmtFee || 0) : totalBeforeIncome * this.state.propertyMgmtPercentage / 100;
@@ -314,8 +312,6 @@ class CalculatorBody2 extends React.Component {
     let cashOnCashReturnAfter = netIncomeAfter * 12 / (turnKeyCost + this.state.rehab) * 100;
     let capRateBefore = (totalBeforeIncome - operatingExpensesBefore) * 12 / purchasePrice * 100;
     let capRateAfter = (totalAfterIncome - operatingExpensesAfter) * 12 / purchasePrice * 100;
-
-    const numberOfUnits = this.state.dropdown ? <InputItem label='Number of Units' name='numUnits' value={(this.state.numUnits)} handleChange={this.handleInputChange} /> : null;
 
     const pmiLineItem = <InputItem label='PMI' name='pmi' value={pmi} sign='dollar' readOnly={true} />;
 
@@ -386,21 +382,17 @@ class CalculatorBody2 extends React.Component {
             <InputItem label='Loan Origination Fee' name1='loanOriginationFee' value1={this.state.loanOriginationFee} name2='loanOriginationPercentage' value2={this.state.loanOriginationPercentage} handleChange={this.handleInputChange} />
             <InputItem label='Closing Cost' name1='closingCostFee' value1={this.state.closingCostFee} name2='closingCostPercentage' value2={this.state.closingCostPercentage} handleChange={this.handleInputChange} />
             <Separator />
-            <Dropdown label='Unit Rental Value' name='dropdown' value={this.state.dropdown} handleChange={this.handleDropdownChange} />
-            {numberOfUnits}
             <Container width='100%' display='flex' align='center' justify='center' height='40px'>
               <span className='heading'>BEFORE REHAB</span>
             </Container>
-            {this.state.dropdown ? incomePerUnitAllBefore : null}
-            {this.state.dropdown ? null : incomePerUnitListBefore}
-            {this.state.dropdown ? null : addItemBefore}
+            {incomePerUnitListBefore}
+            {addItemBefore}
             <Container width='100%' display='flex' align='center' justify='center' height='40px'>
               <span className='heading'>AFTER REHAB</span>
             </Container>
             <InputItem label='Estimated Rehab Cost' name='rehab' value={this.state.rehab} handleChange={this.handleInputChange} sign='dollar' />
-            {this.state.dropdown ? incomePerUnitAllAfter : null}
-            {this.state.dropdown ? null : incomePerUnitListAfter}
-            {this.state.dropdown ? null : addItemAfter}
+            {incomePerUnitListAfter}
+            {addItemAfter}
             <Separator />
             <InputItem label='Insurance Cost/Unit' name='insurancePerUnit' value={this.state.insurancePerUnit} handleChange={this.handleInputChange} sign='dollar' />
             <InputItem label='Utilities Cost/Unit' name='utilitiesPerUnit' value={this.state.utilitiesPerUnit} handleChange={this.handleInputChange} sign='dollar' />
