@@ -1,6 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import InputItem from './InputItem';
+import Separator from './Separator';
+import Dropdown from './Dropdown';
+import { Plus } from './svg';
 
 const Container = styled.div`
   width: ${props => props.width} !important;
@@ -84,26 +87,35 @@ class CalculatorBody2 extends React.Component {
       rentPerUnitRehab: 3000,
       vacancyPercentage: 5,
       maintenancePercentage: 5,
-      cashBack: ''
+      cashBack: '',
+      dropdown: true,
+      differentIncomeBefore: [{ qty: 1, amt: null }],
+      differentIncomeAfter: [{ qty: 1, amt: null }]
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleRadioChange = this.handleRadioChange.bind(this);
+    this.handleUnitItemChange = this.handleUnitItemChange.bind(this);
+    this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.monthlyPayment = this.monthlyPayment.bind(this);
     this.isInt = this.isInt.bind(this);
     this.calculatePmi = this.calculatePmi.bind(this);
     this.removeCommas = this.removeCommas.bind(this);
+    this.deleteItem = this.deleteItem.bind(this);
+    this.addItem = this.addItem.bind(this);
+    this.calculateTotalBefore = this.calculateTotalBefore.bind(this);
+    this.calculateTotalAfter = this.calculateTotalAfter.bind(this);
+    this.calculateNumUnitsBefore = this.calculateNumUnitsBefore.bind(this);
+    this.calculateNumUnitsAfter = this.calculateNumUnitsAfter.bind(this);
   };
 
   handleInputChange(event) {
     const target = event.target;
     const name = target.name;
-    const value = target.value;
-    const autoZero = value === '' ? 0 : this.removeCommas(value);
-
+    const value = this.removeCommas(target.value);
 
     this.setState({
-      [name]: autoZero
+      [name]: value || null
     }, () => {
       if (name === 'downPayment') {
         this.setState({
@@ -157,6 +169,15 @@ class CalculatorBody2 extends React.Component {
     });
   };
 
+  handleDropdownChange(event) {
+    const target = event.target;
+    const name = target.name;
+
+    this.setState({
+      [name]: !this.state[name]
+    })
+  };
+
   monthlyPayment(rate, nperiod, pv, fv, type) {
     if (!fv) fv = 0;
     if (!type) type = 0;
@@ -192,8 +213,74 @@ class CalculatorBody2 extends React.Component {
     }
   };
 
+  deleteItem(idx, name) {
+    const arr = Array.from(this.state[name]);
+    arr.splice(idx, 1);
+
+    this.setState({
+      [name]: arr
+    });
+  };
+
+  addItem(name) {
+    let arr = Array.from(this.state[name]);
+    arr.push({ qty: 1, amt: null });
+
+    this.setState({
+      [name]: arr
+    })
+  };
+
+  handleUnitItemChange(idx, name, key, event) {
+    const target = event.target;
+    const value = target.value || null;
+
+    let arr = Array.from(this.state[name]);
+    arr[idx][key] = this.removeCommas(value);
+
+    this.setState({
+      [name]: arr
+    })
+  };
+
+  calculateTotalBefore() {
+    let arr = this.state.differentIncomeBefore;
+    let total = 0;
+    for (let i = 0; i < arr.length; i++) {
+      total += arr[i].qty * arr[i].amt;
+    };
+    return total;
+  }
+
+  calculateTotalAfter() {
+    let arr = this.state.differentIncomeAfter;
+    let total = 0;
+    for (let i = 0; i < arr.length; i++) {
+      total += arr[i].qty * arr[i].amt;
+    };
+    return total;
+  };
+
+  calculateNumUnitsBefore() {
+    let arr = this.state.differentIncomeBefore;
+    let total = 0;
+    for (let i = 0; i < arr.length; i++) {
+      total += arr[i].qty;
+    };
+    return total;
+  };
+
+  calculateNumUnitsAfter() {
+    let arr = this.state.differentIncomeAfter;
+    let total = 0;
+    for (let i = 0; i < arr.length; i++) {
+      total += arr[i].qty;
+    };
+    return total;
+  };
+
   render() {
-    let purchasePrice = this.state.purchasePrice;
+    let purchasePrice = this.state.purchasePrice || 0;
     let downPayment = this.state.downPayment;
     let downPaymentPercentage = this.state.downPaymentPercentage;
     let loanAmount = purchasePrice - (downPayment);
@@ -206,35 +293,82 @@ class CalculatorBody2 extends React.Component {
     let loanOrigination = loanAmount * ((this.state.loanOriginationPercentage) / 100);
     let closingCost = purchasePrice * ((this.state.closingCostPercentage) / 100);
     let monthlyTax = ((this.state.taxRatePercentage) / 100) * purchasePrice / 12;
-    let totalInsurance = (this.state.insurancePerUnit) * (this.state.numUnits);
-    let totalUtilities = this.state.utilitiesPerUnit * (this.state.numUnits);
-    let totalBeforeIncome = (this.state.numUnits) * (this.state.rentPerUnit);
-    let totalAfterIncome = (this.state.numUnits) * this.state.rentPerUnitRehab;
-    let propertyMgmtFeeBefore = this.state.propertyMgmtRadio === '1' ? this.state.propertyMgmtFee : totalBeforeIncome * this.state.propertyMgmtPercentage / 100;
-    let propertyMgmtFeeAfter = this.state.propertyMgmtRadio === '1' ? this.state.propertyMgmtFee : totalAfterIncome * this.state.propertyMgmtPercentage / 100;
+    let totalInsuranceBefore = this.state.dropdown ? this.state.insurancePerUnit * this.state.numUnits : this.state.insurancePerUnit * this.calculateNumUnitsBefore();
+    let totalInsuranceAfter = this.state.dropdown ? this.state.insurancePerUnit * this.state.numUnits : this.state.insurancePerUnit * this.calculateNumUnitsAfter();
+    let totalUtilitiesBefore = this.state.dropdown ? this.state.utilitiesPerUnit * this.state.numUnits : this.state.utilitiesPerUnit * this.calculateNumUnitsBefore();
+    let totalUtilitiesAfter = this.state.dropdown ? this.state.utilitiesPerUnit * this.state.numUnits : this.state.utilitiesPerUnit * this.calculateNumUnitsAfter();
+    let totalBeforeIncome = this.state.dropdown ? this.state.numUnits * this.state.rentPerUnit : this.calculateTotalBefore();
+    let totalAfterIncome = this.state.dropdown ? this.state.numUnits * this.state.rentPerUnitRehab : this.calculateTotalAfter();
+    let propertyMgmtFeeBefore = this.state.propertyMgmtRadio === '1' ? (this.state.propertyMgmtFee || 0) : totalBeforeIncome * this.state.propertyMgmtPercentage / 100;
+    let propertyMgmtFeeAfter = this.state.propertyMgmtRadio === '1' ? (this.state.propertyMgmtFee || 0) : totalAfterIncome * this.state.propertyMgmtPercentage / 100;
     let vacancyAmtBefore = totalBeforeIncome * (this.state.vacancyPercentage) / 100;
     let vacancyAmtAfter = totalAfterIncome * (this.state.vacancyPercentage) / 100;
     let maintenanceAmtBefore = totalBeforeIncome * (this.state.maintenancePercentage) / 100;
     let maintenanceAmtAfter = totalAfterIncome * (this.state.maintenancePercentage) / 100;
-    let operatingExpensesBefore = monthlyTax + totalInsurance + parseFloat(propertyMgmtFeeBefore) + totalUtilities + (vacancyAmtBefore) + maintenanceAmtBefore + parseFloat(pmi);
-    let operatingExpensesAfter = monthlyTax + totalInsurance + parseFloat(propertyMgmtFeeAfter) + totalUtilities + (vacancyAmtAfter) + maintenanceAmtAfter + parseFloat(pmi);
+    let operatingExpensesBefore = monthlyTax + totalInsuranceBefore + parseFloat(propertyMgmtFeeBefore) + totalUtilitiesBefore + (vacancyAmtBefore) + maintenanceAmtBefore + parseFloat(pmi);
+    let operatingExpensesAfter = monthlyTax + totalInsuranceAfter + parseFloat(propertyMgmtFeeAfter) + totalUtilitiesAfter + (vacancyAmtAfter) + maintenanceAmtAfter + parseFloat(pmi);
     let netIncomeBefore = totalBeforeIncome - parseFloat(operatingExpensesBefore) - payment;
     let netIncomeAfter = totalAfterIncome - operatingExpensesAfter - payment;
-    let turnKeyCost = parseFloat(downPayment) + loanOrigination + closingCost - (this.state.cashBack);
+    let turnKeyCost = (parseFloat(downPayment) || 0) + loanOrigination + closingCost - (this.state.cashBack);
     let cashOnCashReturnBefore = netIncomeBefore * 12 / turnKeyCost * 100;
     let cashOnCashReturnAfter = netIncomeAfter * 12 / (turnKeyCost + this.state.rehab) * 100;
     let capRateBefore = (totalBeforeIncome - operatingExpensesBefore) * 12 / purchasePrice * 100;
     let capRateAfter = (totalAfterIncome - operatingExpensesAfter) * 12 / purchasePrice * 100;
 
-    const pmiLineItem = (
-      <InputItem label='PMI' name='pmi' value={pmi} sign='dollar' readOnly={true} />
-    );
+    const numberOfUnits = this.state.dropdown ? <InputItem label='Number of Units' name='numUnits' value={(this.state.numUnits)} handleChange={this.handleInputChange} /> : null;
+
+    const pmiLineItem = <InputItem label='PMI' name='pmi' value={pmi} sign='dollar' readOnly={true} />;
+
+    const incomePerUnitAllBefore = <InputItem label='Income Per Unit' name='rentPerUnit' value={this.state.rentPerUnit} handleChange={this.handleInputChange} sign='dollar' />;
+
+    const incomePerUnitListBefore = this.state.differentIncomeBefore.map((item, idx) => {
+      return <InputItem
+        unitData
+        label={`Unit Type ${idx + 1}`}
+        name='differentIncomeBefore'
+        name1={`qty`}
+        name2={`amt`}
+        value1={item.qty}
+        value2={item.amt}
+        key={idx}
+        idx={idx}
+        numItems={this.state.differentIncomeBefore.length}
+        deleteItem={this.deleteItem}
+        handleChange={this.handleUnitItemChange}
+      />
+    });
+
+    const addItemBefore = <InputItem name='differentIncomeBefore' label='Add New Type' addItem={this.addItem} plus />;
+
+    const incomePerUnitAllAfter = <InputItem label='Income Per Unit' name='rentPerUnitRehab' value={this.state.rentPerUnitRehab} handleChange={this.handleInputChange} sign='dollar' />;
+
+    const incomePerUnitListAfter = this.state.differentIncomeAfter.map((item, idx) => {
+      return <InputItem
+        unitData
+        label={`Unit Type ${idx + 1}`}
+        name='differentIncomeAfter'
+        name1={`qty`}
+        name2={`amt`}
+        value1={item.qty}
+        value2={item.amt}
+        key={idx}
+        idx={idx}
+        numItems={this.state.differentIncomeAfter.length}
+        deleteItem={this.deleteItem}
+        handleChange={this.handleUnitItemChange}
+      />
+    });
+
+    const addItemAfter = <InputItem name='differentIncomeAfter' label='Add New Type' addItem={this.addItem} plus />;
 
     return (
       <Container display='flex' direction='column' width='98vw' maxWidth='1000px'>
-        <center>
-          <h2>Cashflow Calculator</h2>
-        </center>
+        <Container width='100%' display='flex' direction='column'>
+          <center>
+          <img src='assets/logo.png' width='50px' />
+            <h2>Cashflow Calculator</h2>
+          </center>
+        </Container>
 
         <Container display='flex' direction='row' justify='space-around' flexWrap='wrap'>
           <Container className='col col1'>
@@ -251,10 +385,23 @@ class CalculatorBody2 extends React.Component {
             <InputItem label='Loan Term (Years)' name='loanTermYears' value={this.state.loanTermYears} handleChange={this.handleInputChange} />
             <InputItem label='Loan Origination Fee' name1='loanOriginationFee' value1={this.state.loanOriginationFee} name2='loanOriginationPercentage' value2={this.state.loanOriginationPercentage} handleChange={this.handleInputChange} />
             <InputItem label='Closing Cost' name1='closingCostFee' value1={this.state.closingCostFee} name2='closingCostPercentage' value2={this.state.closingCostPercentage} handleChange={this.handleInputChange} />
-            <InputItem label='Number of Units' name='numUnits' value={(this.state.numUnits)} handleChange={this.handleInputChange} />
-            <InputItem label='Before Rehab Income/Unit' name='rentPerUnit' value={this.state.rentPerUnit} handleChange={this.handleInputChange} sign='dollar' />
+            <Separator />
+            <Dropdown label='Unit Rental Value' name='dropdown' value={this.state.dropdown} handleChange={this.handleDropdownChange} />
+            {numberOfUnits}
+            <Container width='100%' display='flex' align='center' justify='center' height='40px'>
+              <span className='heading'>BEFORE REHAB</span>
+            </Container>
+            {this.state.dropdown ? incomePerUnitAllBefore : null}
+            {this.state.dropdown ? null : incomePerUnitListBefore}
+            {this.state.dropdown ? null : addItemBefore}
+            <Container width='100%' display='flex' align='center' justify='center' height='40px'>
+              <span className='heading'>AFTER REHAB</span>
+            </Container>
             <InputItem label='Estimated Rehab Cost' name='rehab' value={this.state.rehab} handleChange={this.handleInputChange} sign='dollar' />
-            <InputItem label='After Rehab Income/Unit' name='rentPerUnitRehab' value={this.state.rentPerUnitRehab} handleChange={this.handleInputChange} sign='dollar' />
+            {this.state.dropdown ? incomePerUnitAllAfter : null}
+            {this.state.dropdown ? null : incomePerUnitListAfter}
+            {this.state.dropdown ? null : addItemAfter}
+            <Separator />
             <InputItem label='Insurance Cost/Unit' name='insurancePerUnit' value={this.state.insurancePerUnit} handleChange={this.handleInputChange} sign='dollar' />
             <InputItem label='Utilities Cost/Unit' name='utilitiesPerUnit' value={this.state.utilitiesPerUnit} handleChange={this.handleInputChange} sign='dollar' />
             <InputItem label='Property Mgmt Fee' name1='propertyMgmtFee' value1={this.state.propertyMgmtFee} name2='propertyMgmtPercentage' value2={this.state.propertyMgmtPercentage} handleRadioChange={this.handleRadioChange} handleChange={this.handleInputChange} select={true} />
@@ -268,7 +415,7 @@ class CalculatorBody2 extends React.Component {
               <span className='title'>OUTPUTS</span>
             </Container>
 
-            <InputItem label='Purchase Price' name='purchasePrice' value={this.isInt(purchasePrice)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Purchase Price' name='purchasePrice' value={this.isInt(purchasePrice)} sign='dollar' readOnly={true} />
             <InputItem label='Down Payment' name='downPayment' value={this.state.downPayment} sign='dollar' readOnly={true} payable={true} />
             <InputItem label='Loan Amount' name='loanAmount' value={this.isInt(loanAmount)} sign='dollar' readOnly={true} weight={700} />
             <InputItem label='Loan Origination Fee' name='loanOrigination' value={this.isInt(loanOrigination)} sign='dollar' readOnly={true} payable={true} />
@@ -283,10 +430,10 @@ class CalculatorBody2 extends React.Component {
             <InputItem label='Total Rent Income' name='totalBeforeIncome' value={this.isInt(totalBeforeIncome)} sign='dollar' readOnly={true} weight={700} />
             <InputItem label='Debt Service' name='monthlyPayment' value={this.isInt(payment)} sign='dollar' readOnly={true} payable={true} weight={700} />
             <InputItem label='Tax' name='monthlyTax' value={this.isInt(monthlyTax)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label='Total Insurance' name='totalInsurance' value={this.isInt(totalInsurance)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label='Total Utilities' name='totalUtilities' value={this.isInt(totalUtilities)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label={`${this.state.vacancyPercentage}% Vacancy`} name='vacancyBefore' value={this.isInt(vacancyAmtBefore)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label={`${this.state.maintenancePercentage}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtBefore)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Insurance' name='totalInsurance' value={this.isInt(totalInsuranceBefore)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Utilities' name='totalUtilities' value={this.isInt(totalUtilitiesBefore)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.vacancyPercentage || 0}% Vacancy`} name='vacancyBefore' value={this.isInt(vacancyAmtBefore)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.maintenancePercentage || 0}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtBefore)} sign='dollar' readOnly={true} payable={true} />
             <InputItem label='Property Mgmt Fee' name='propertyMgmtFeeBefore' value={this.isInt(propertyMgmtFeeBefore)} sign='dollar' readOnly={true} payable={true} />
             <InputItem label='Total Operating Expenses' name='totalOperatingExpensesBefore' value={this.isInt(operatingExpensesBefore)} sign='dollar' readOnly={true} payable={true} weight={700} />
             <InputItem label='Net Income' name='netBeforeIncome' value={this.isInt(netIncomeBefore)} sign='dollar' readOnly={true} weight={700} />
@@ -299,10 +446,10 @@ class CalculatorBody2 extends React.Component {
             <InputItem label='Total Rent Income' name='totalAfterIncome' value={this.isInt(totalAfterIncome)} sign='dollar' readOnly={true} weight={700} />
             <InputItem label='Debt Service' name='monthlyPayment' value={this.isInt(payment)} sign='dollar' readOnly={true} payable={true} weight={700} />
             <InputItem label='Tax' name='monthlyTax' value={this.isInt(monthlyTax)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label='Total Insurance' name='totalInsurance' value={this.isInt(totalInsurance)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label='Total Utilities' name='totalUtilities' value={this.isInt(totalUtilities)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label={`${this.state.vacancyPercentage}% Vacancy`} name='vacancyAfter' value={this.isInt(vacancyAmtAfter)} sign='dollar' readOnly={true} payable={true} />
-            <InputItem label={`${this.state.maintenancePercentage}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtAfter)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Insurance' name='totalInsurance' value={this.isInt(totalInsuranceAfter)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label='Total Utilities' name='totalUtilities' value={this.isInt(totalUtilitiesAfter)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.vacancyPercentage || 0}% Vacancy`} name='vacancyAfter' value={this.isInt(vacancyAmtAfter)} sign='dollar' readOnly={true} payable={true} />
+            <InputItem label={`${this.state.maintenancePercentage || 0}% Maintenance`} name='maintenance' value={this.isInt(maintenanceAmtAfter)} sign='dollar' readOnly={true} payable={true} />
             <InputItem label='Property Mgmt Fee' name='propertyMgmtFeeAfter' value={this.isInt(propertyMgmtFeeAfter)} sign='dollar' readOnly={true} payable={true} />
             <InputItem label='Total Operating Expenses' name='totalOperatingExpensesAfter' value={this.isInt(operatingExpensesAfter)} sign='dollar' readOnly={true} payable={true} weight={700} />
             <InputItem label='Net Income' name='netAfterIncome' value={this.isInt(netIncomeAfter)} sign='dollar' readOnly={true} weight={700} />
