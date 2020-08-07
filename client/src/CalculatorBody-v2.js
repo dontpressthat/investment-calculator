@@ -69,7 +69,6 @@ class CalculatorBody2 extends React.Component {
       downPaymentPercentage: 20,
       loanTermYears: 30,
       interestRate: 5.5,
-      numUnits: 2,
       loanOriginationFee: 3200,
       loanOriginationPercentage: 1,
       closingCostFee: 4000,
@@ -82,8 +81,6 @@ class CalculatorBody2 extends React.Component {
       insurancePerUnit: 50,
       utilitiesPerUnit: 55,
       rehab: 25000,
-      rentPerUnit: 1900,
-      rentPerUnitRehab: 3000,
       vacancyPercentage: 5,
       maintenancePercentage: 5,
       cashBack: '',
@@ -295,8 +292,8 @@ class CalculatorBody2 extends React.Component {
     let totalInsuranceAfter = this.state.insurancePerUnit * this.calculateNumUnitsAfter();
     let totalUtilitiesBefore = this.state.utilitiesPerUnit * this.calculateNumUnitsBefore();
     let totalUtilitiesAfter = this.state.utilitiesPerUnit * this.calculateNumUnitsAfter();
-    let totalBeforeIncome = this.state.dropdown ? this.state.numUnits * this.state.rentPerUnit : this.calculateTotalBefore();
-    let totalAfterIncome = this.state.dropdown ? this.state.numUnits * this.state.rentPerUnitRehab : this.calculateTotalAfter();
+    let totalBeforeIncome = this.calculateTotalBefore();
+    let totalAfterIncome = this.calculateTotalAfter();
     let propertyMgmtFeeBefore = this.state.propertyMgmtRadio === '1' ? (this.state.propertyMgmtFee || 0) : totalBeforeIncome * this.state.propertyMgmtPercentage / 100;
     let propertyMgmtFeeAfter = this.state.propertyMgmtRadio === '1' ? (this.state.propertyMgmtFee || 0) : totalAfterIncome * this.state.propertyMgmtPercentage / 100;
     let vacancyAmtBefore = totalBeforeIncome * (this.state.vacancyPercentage) / 100;
@@ -383,12 +380,12 @@ class CalculatorBody2 extends React.Component {
             <InputItem label='Closing Cost' name1='closingCostFee' value1={this.state.closingCostFee} name2='closingCostPercentage' value2={this.state.closingCostPercentage} handleChange={this.handleInputChange} />
             <Separator />
             <Container width='100%' display='flex' align='center' justify='center' height='40px'>
-              <span className='heading'>BEFORE REHAB</span>
+              <span className='heading'>BEFORE REHAB RENTAL INCOME</span>
             </Container>
             {incomePerUnitListBefore}
             {addItemBefore}
             <Container width='100%' display='flex' align='center' justify='center' height='40px'>
-              <span className='heading'>AFTER REHAB</span>
+              <span className='heading'>AFTER REHAB RENTAL INCOME</span>
             </Container>
             <InputItem label='Estimated Rehab Cost' name='rehab' value={this.state.rehab} handleChange={this.handleInputChange} sign='dollar' />
             {incomePerUnitListAfter}
