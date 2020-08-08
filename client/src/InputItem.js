@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import NumberFormat from 'react-number-format';
+import { Minus, Plus } from './svg';
 
 const itemHeight = '30px';
 
@@ -21,6 +22,14 @@ const Container = styled.div`
     white-space: nowrap !important;
     font-family: 'Roboto Condensed', sans-serif !important;
     font-weight: 300 !important;
+  };
+  &.enabled {
+    &:hover {
+      cursor: pointer;
+    };
+  };
+  &.disabled {
+
   };
 `;
 
@@ -88,7 +97,7 @@ const PercentSuffix = styled.div`
   };
 `
 
-const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRadioChange, handleChange, sign, readOnly, select, payable, weight }) => {
+const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRadioChange, handleChange, sign, readOnly, select, payable, weight, unitData, numItems, deleteItem, addItem, idx, plus }) => {
   let dollarPadding;
   let dollarSign;
   let percentSign;
@@ -122,6 +131,7 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRad
   };
 
   const or = <Container><span>OR</span></Container>
+  const x = <Container><span>x</span></Container>
   const select1 = (
     <Container>
       <input className='radio' type='radio' name='propertyMgmtRadio' value='1' onChange={handleRadioChange} />
@@ -212,6 +222,60 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRad
       </Container>
     </Container>
   );
+
+  const unitIncomeInput = (
+    <Container display='flex' justify='space-between' width='100%'>
+      <Container width='45%' margin='5px'>
+        <label>
+          {label}
+        </label>
+      </Container>
+      <Container width='50%' margin='5px' display='flex' direction='row' justify='space-between'>
+        <Container width='20%'>
+          <Container display='flex' direction='row' align='center'>
+            <Container>
+              <Input name={name1} value={value1} onChange={event => {handleChange(idx, name, name1, event)}} width='100%' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()}></Input>
+            </Container>
+          </Container>
+        </Container>
+        {x}
+        <Container width='50%'>
+          <Container display='flex' direction='row' align='center'>
+            <Container>
+              <DollarPrefix color='#555555' />
+              <Input name={name2} value={value2} onChange={event => {handleChange(idx, name, name2, event)}} width='100%' paddingleft='20px' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()}></Input>
+            </Container>
+          </Container>
+        </Container>
+        <Container width='10%' display='flex' direction='row' align='center' justify='flex-end' margin='0 5px 0 0'>
+          <Container className={numItems === 1 ? 'disabled' : 'enabled'} display='flex' direction='row' align='center' height='max-content' onClick={numItems !== 1 ? () => { deleteItem(idx, name) } : null}>
+            <Minus color={numItems === 1 ? 'lightgray' : 'black'} />
+          </Container>
+        </Container>
+      </Container>
+    </Container>
+  );
+
+  const addToList = (
+    <Container display='flex' justify='space-between' width='100%'>
+      <Container width='45%' margin='5px'>
+      </Container>
+      <Container width='50%' margin='5px' display='flex' justify='space-between' align='center'>
+        <label>
+          {label}
+        </label>
+        <Container className='enabled' margin='0 5px 0 0' onClick={() => { addItem(name) }}>
+          <Plus />
+        </Container>
+      </Container>
+    </Container>
+  );
+
+  if (unitData) {
+    return unitIncomeInput;
+  } else if (plus) {
+    return addToList;
+  }
   return name1 && name2 ? doubleInput : singleInput;
 };
 
