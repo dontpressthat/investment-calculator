@@ -97,7 +97,7 @@ const PercentSuffix = styled.div`
   };
 `
 
-const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRadioChange, handleChange, sign, readOnly, select, payable, weight, unitData, numItems, deleteItem, addItem, idx, plus }) => {
+const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRadioAndDropdownChange, handleChange, sign, readOnly, select, payable, weight, unitData, numItems, deleteItem, addItem, idx, plus }) => {
   let dollarPadding;
   let dollarSign;
   let percentSign;
@@ -134,12 +134,12 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRad
   const x = <Container><span>x</span></Container>
   const select1 = (
     <Container>
-      <input className='radio' type='radio' name='propertyMgmtRadio' value='1' onChange={handleRadioChange} />
+      <input className='radio' type='radio' name='propertyMgmtRadio' value='1' onChange={handleRadioAndDropdownChange} />
     </Container>
   );
   const select2 = (
     <Container>
-      <input className='radio' type='radio' name='propertyMgmtRadio' value='2' onChange={handleRadioChange} defaultChecked />
+      <input className='radio' type='radio' name='propertyMgmtRadio' value='2' onChange={handleRadioAndDropdownChange} defaultChecked />
     </Container>
   );
 
@@ -187,7 +187,7 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRad
       <Container width='50%' margin='5px'>
         {dollarSign}
         {percentSign}
-        <Input name={name} value={value} onChange={handleChange} width='100%' paddingleft={dollarPadding} readOnly={readOnly} className={readOnly ? 'readOnly' : null} readonlybgcolor={readOnlyBgColor()} readonlytextcolor={readOnlyTextColor()} thousandSeparator={true} isNumericString={true} placeholder={0} weight={weight}></Input>
+        <Input name={name} value={value} onChange={handleChange} width='100%' paddingleft={dollarPadding} readOnly={readOnly} className={readOnly ? 'readOnly' : null} readonlybgcolor={readOnlyBgColor()} readonlytextcolor={readOnlyTextColor()} thousandSeparator={true} isNumericString={true} placeholder={0} weight={weight} inputmode='decimal'></Input>
       </Container>
     </Container>
   );
@@ -205,7 +205,7 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRad
             {select ? select1 : null}
             <Container margin={select ? '0 0 0 5px' : null}>
               {dollarSign}
-              <Input name={name1} value={value1} onChange={handleChange} width='100%' paddingleft='20px' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()}></Input>
+              <Input name={name1} value={value1} onChange={handleChange} width='100%' paddingleft='20px' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()} inputmode='decimal'></Input>
             </Container>
           </Container>
         </Container>
@@ -215,7 +215,7 @@ const InputItem = ({ label, name, name1, name2, value, value1, value2, handleRad
             {select ? select2 : null}
             <Container margin={select ? '0 0 0 5px' : null}>
               {percentSign}
-              <Input name={name2} value={value2} onChange={handleChange} width='100%' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()}></Input>
+              <Input name={name2} value={value2} onChange={handleChange} width='100%' thousandSeparator={true} isNumericString={true} placeholder={0} readonlytextcolor={readOnlyTextColor()} inputmode='decimal'></Input>
             </Container>
           </Container>
         </Container>
